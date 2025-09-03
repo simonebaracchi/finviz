@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 
 from lxml import etree
 
@@ -8,6 +9,7 @@ from finviz.helper_functions.scraper_functions import get_table
 STOCK_URL = "https://finviz.com/quote.ashx"
 NEWS_URL = "https://finviz.com/news.ashx"
 CRYPTO_URL = "https://finviz.com/crypto_performance.ashx"
+STATEMENT_URL = "https://finviz.com/api/statement.ashx"
 STOCK_PAGE = {}
 
 
@@ -63,6 +65,27 @@ def get_stock(ticker):
                 continue
 
             data[row[column]] = row[column + 1]
+
+    return data
+
+
+def get_statement(ticker):
+    """
+    Returns a dictionary containing statement data from a given stock.
+
+    :param ticker: stock symbol
+    :type ticker: str
+    :return dict
+    """
+
+    data_raw, _ = http_request_get(
+        url=STATEMENT_URL, payload={"t": ticker}, parse=True
+    )
+    parsed = json.loads(data_raw.text)
+    all_data = parsed['data']
+    data = {}
+    for key, value in all_data.items():
+        data[key] = value[0]
 
     return data
 
